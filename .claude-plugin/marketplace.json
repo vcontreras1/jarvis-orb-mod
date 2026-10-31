@@ -1,0 +1,5 @@
+{
+  "name": "jarvis-orb-mod",
+  "owner": { "name": "Valeria" },
+  "plugins": [{ "name": "jarvis-orb", "source": "./" }]
+}

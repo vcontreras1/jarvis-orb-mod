@@ -1,0 +1,7 @@
+{
+  "name": "jarvis-orb",
+  "version": "0.1.0",
+  "author": { "name": "Valeria" },
+  "description": "Panel JARVIS junto al chat: una esfera holográfica cian que se anima cuando Claude piensa o usa herramientas",
+  "types": "./types/index.d.ts"
+}
