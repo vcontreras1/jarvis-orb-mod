@@ -1,7 +1,41 @@
 {
   "name": "jarvis-orb",
-  "version": "0.1.0",
-  "author": { "name": "Valeria" },
+  "version": "0.2.0",
+  "author": {
+    "name": "Valeria"
+  },
   "description": "Panel JARVIS junto al chat: una esfera holográfica cian que se anima cuando Claude piensa o usa herramientas",
-  "types": "./types/index.d.ts"
+  "types": "./types/index.d.ts",
+  "userConfig": {
+    "elevenlabs_api_key": {
+      "type": "string",
+      "title": "Clave de ElevenLabs",
+      "description": "Clave de API de ElevenLabs con permiso solo de Text to Speech. Se guarda en el almacenamiento seguro, nunca en el repositorio.",
+      "sensitive": true
+    },
+    "voz_espanol": {
+      "type": "string",
+      "title": "Voz para español",
+      "description": "ID de voz de ElevenLabs. Por defecto Jarvis; Max es hFeIFfaOsIqH1YpJJFS0.",
+      "default": "wDsJlOXPqcvIUKdLXjDs"
+    },
+    "voz_ingles": {
+      "type": "string",
+      "title": "Voz para inglés",
+      "description": "ID de voz de ElevenLabs. Por defecto Jarvis.",
+      "default": "wDsJlOXPqcvIUKdLXjDs"
+    },
+    "modelo": {
+      "type": "string",
+      "title": "Modelo",
+      "description": "eleven_multilingual_v2 (mejor calidad) o eleven_flash_v2_5 (la mitad de créditos y más rápido).",
+      "default": "eleven_multilingual_v2"
+    },
+    "max_caracteres": {
+      "type": "number",
+      "title": "Máximo de caracteres",
+      "description": "Las respuestas más largas se cortan para ahorrar créditos.",
+      "default": 1500
+    }
+  }
 }

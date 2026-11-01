@@ -42,3 +42,16 @@ test('cuenta las herramientas y dibuja la esfera en el escritorio', async ($, on
   expect(await ui.find({ type: 'Svg' })).toBeTruthy()
   await ui.unmount()
 })
+
+test('un mod sin clave avisa una vez y no rompe el turno', async ($, on) => {
+  on('command.register', () => ({ value: { command: 'jarvis' } }))
+  on('ui.open', () => ({ value: { isPlaced: true } }))
+  on('session.start', (_, e) => ({ cwd: e.cwd }))
+  on('turn.start', () => ({ turnId: 't1' }))
+  on('turn.complete', () => ({ text: 'Hola Valeria. Todo en orden.' }))
+  on('process.run', () => ({ value: { exitCode: 0, stdout: '', stderr: '' } }))
+
+  await $.session.start({ cwd: '/', surface: 'desktop', isInteractive: true })
+  const done = await $.turn.complete({ reason: 'answer' } as never)
+  expect(done.text).toBe('Hola Valeria. Todo en orden.')
+})

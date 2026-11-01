@@ -1,5 +1,5 @@
 import { atom, read, update } from 'claude-code'
-import type { Register } from 'claude-code'
+import type { EngineInterface, PluginOptions, Register } from 'claude-code'
 
 import type { OrbState, Phase } from '../types'
 
@@ -17,11 +17,12 @@ const orb = atom({ plugin: 'jarvis-orb', key: 'orb' } as const, {
 } as OrbState)
 
 const CYAN = '#45e2f7'
-const SPEED: Record<Phase, number> = { idle: 1, thinking: 2.6, tool: 3.8 }
+const SPEED: Record<Phase, number> = { idle: 1, thinking: 2.6, tool: 3.8, speaking: 3.2 }
 const LABEL: Record<Phase, string> = {
   idle: 'EN ESPERA',
   thinking: 'PROCESANDO…',
   tool: 'EJECUTANDO',
+  speaking: 'HABLANDO',
 }
 
 function orbSvg(phase: Phase): string {
@@ -83,11 +84,116 @@ function orbSvg(phase: Phase): string {
 </svg>`
 }
 
-export const register: Register = on => {
+// ——— Voz: lee cada respuesta con ElevenLabs ———
+// La clave llega por las opciones del mod (almacenamiento seguro) y se pasa a
+// curl por la entrada estándar, para que no aparezca en la lista de procesos.
+const ES_WORDS = new Set('que de la el los las en y para con por una un es se lo como más pero su al del este esta muy también puedes hay está son sí tu te mi'.split(' '))
+const EN_WORDS = new Set('the and you is to of that it for with this are on be have not your can will but what if or an as at from they we'.split(' '))
+
+function language(text: string): 'es' | 'en' {
+  const lower = text.toLowerCase()
+  let es = (lower.match(/[ñáéíóú¿¡]/g) ?? []).length * 2
+  let en = 0
+  for (const word of lower.match(/[a-záéíóúñü']+/g) ?? []) {
+    if (ES_WORDS.has(word)) es++
+    else if (EN_WORDS.has(word)) en++
+  }
+  return en > es ? 'en' : 'es'
+}
+
+function speakable(text: string, max: number): string {
+  const plain = text
+    .replace(/```[\s\S]*?```/g, ' ')
+    .replace(/`([^`]*)`/g, '$1')
+    .replace(/\[([^\]]*)\]\([^)]*\)/g, '$1')
+    .replace(/https?:\/\/\S+/g, ' enlace ')
+    .replace(/[*_#>|~]+/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim()
+  if (plain.length <= max) return plain
+  const cut = plain.slice(0, max)
+  const end = Math.max(cut.lastIndexOf('. '), cut.lastIndexOf('? '), cut.lastIndexOf('! '))
+
+  return end > max * 0.5 ? cut.slice(0, end + 1) : cut
+}
+
+let isMuted = false
+let session = 0
+let warned = false
+const file = (n: number) => `/tmp/jarvis-voz-${n}.mp3`
+
+async function stopVoice($: EngineInterface) {
+  session++
+  await $.process.run(['pkill', '-f', '/tmp/jarvis-voz-']).catch(() => {})
+}
+
+// Pide el audio a ElevenLabs, lo guarda en /tmp y lo reproduce con afplay.
+// Es decorativo: cualquier fallo se avisa una vez y no afecta al turno.
+async function speak($: EngineInterface, raw: string, options: PluginOptions) {
+  const text = speakable(raw, Number(options.max_caracteres) || 1500)
+  if (!text) return
+  if (!String(options.elevenlabs_api_key ?? '')) {
+    if (!warned) {
+      warned = true
+      $.ui.toast('Jarvis: falta la clave de ElevenLabs (ajustes del mod jarvis-orb)')
+    }
+
+    return
+  }
+
+  await stopVoice($)
+  const mine = session
+  const out = file(mine)
+  const voice = language(text) === 'en' ? options.voz_ingles : options.voz_espanol
+  const config = [
+    `url = "https://api.elevenlabs.io/v1/text-to-speech/${String(voice)}?output_format=mp3_44100_128"`,
+    `header = "xi-api-key: ${String(options.elevenlabs_api_key)}"`,
+    'header = "Content-Type: application/json"',
+    'header = "Accept: audio/mpeg"',
+    `data = ${JSON.stringify(JSON.stringify({ text, model_id: String(options.modelo) }))}`,
+    `output = "${out}"`,
+    'write-out = "%{http_code}"',
+    'silent',
+  ].join('\n')
+
+  try {
+    const got = await $.process.run(['curl', '-K', '-'], { stdin: config, timeoutMs: 60000 })
+    if (mine !== session) return
+    const status = got.stdout.trim()
+    if (got.exitCode !== 0 || status !== '200') {
+      const reason: Record<string, string> = {
+        '401': 'la clave no es válida',
+        '402': 'no quedan créditos',
+        '422': 'el texto o la voz no son válidos',
+        '429': 'demasiadas peticiones seguidas',
+      }
+      $.ui.toast(`Jarvis: ${reason[status] ?? 'no pude conectar con ElevenLabs'}`)
+
+      return
+    }
+    await update($, orb, (s): OrbState => ({ ...s, phase: 'speaking', tool: null }))
+    await $.process.run(['afplay', out], { timeoutMs: 600000 })
+  } catch {
+    // detenido por una respuesta nueva, o sin reproductor
+  } finally {
+    if (mine === session) {
+      await update($, orb, (s): OrbState => (s.phase === 'speaking' ? { ...s, phase: 'idle' } : s)).catch(() => {})
+    }
+    void $.process.run(['rm', '-f', out]).catch(() => {})
+  }
+}
+
+
+export const register: Register = (on, options) => {
+
   on('session.start', async ($, e, next) => {
     await $.command.register({
       name: 'jarvis',
       description: 'Abre el panel JARVIS con la esfera',
+    })
+    await $.command.register({
+      name: 'jarvis-voz',
+      description: 'Activa o desactiva la lectura en voz alta de las respuestas',
     })
     void $.ui.open({ id: PANE, title: TITLE })
 
@@ -100,9 +206,18 @@ export const register: Register = on => {
     return { text: 'Panel JARVIS abierto.' }
   })
 
+  // /jarvis-voz apaga o enciende la lectura en voz alta (solo esta sesión)
+  on('command.run', { command: 'jarvis-voz' }, async $ => {
+    isMuted = !isMuted
+    if (isMuted) await stopVoice($)
+
+    return { text: isMuted ? 'Jarvis ya no lee las respuestas.' : 'Jarvis leerá las respuestas en voz alta.' }
+  })
+
   // Solo el turno principal cambia la fase; los subagentes no la tocan
   on('turn.start', async ($, e, next) => {
     if (e.agentId === undefined) {
+      await stopVoice($) // una respuesta nueva calla la anterior
       await update($, orb, (): OrbState => ({ phase: 'thinking', tool: null, tools: 0 }))
     }
 
@@ -123,11 +238,13 @@ export const register: Register = on => {
   })
 
   on('turn.complete', async ($, e, next) => {
-    if (e.agentId === undefined) {
-      await update($, orb, (s): OrbState => ({ ...s, phase: 'idle', tool: null }))
-    }
+    const answer = await next(e)
+    if (e.agentId !== undefined) return answer
 
-    return next(e)
+    await update($, orb, (s): OrbState => ({ ...s, phase: 'idle', tool: null }))
+    if (e.reason === 'answer' && !isMuted) void speak($, answer.text, options)
+
+    return answer
   })
 
   on('ui.render', { component: 'Pane', requestId: PANE }, async ($, e) => {

@@ -1,5 +1,5 @@
-/** Qué está haciendo Claude: en espera, pensando o usando una herramienta. */
-export type Phase = 'idle' | 'thinking' | 'tool'
+/** Qué está haciendo Claude: en espera, pensando, usando una herramienta o leyendo en voz alta. */
+export type Phase = 'idle' | 'thinking' | 'tool' | 'speaking'
 
 export type OrbState = {
   phase: Phase
