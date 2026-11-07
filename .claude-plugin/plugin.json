@@ -1,10 +1,10 @@
 {
   "name": "jarvis-orb",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "author": {
     "name": "Valeria"
   },
-  "description": "Panel JARVIS junto al chat: una esfera holográfica cian que se anima cuando Claude piensa o usa herramientas",
+  "description": "Panel JARVIS junto al chat: una esfera holográfica que se anima y un guía que recomienda y usa tus skills y agentes en cada petición",
   "types": "./types/index.d.ts",
   "userConfig": {
     "elevenlabs_api_key": {
