@@ -260,21 +260,36 @@ const CATALOGO: Tema[] = [
   },
   {
     titulo: 'Vídeo y audio',
-    palabras: ['video', 'reel', 'animacion', 'subtitulo', 'clip', 'voz en off', 'locucion', 'musica', 'ffmpeg', 'mp4'],
+    palabras: ['video', 'reel', 'animacion', 'subtitulo', 'clip', 'voz en off', 'locucion', 'musica', 'ffmpeg', 'mp4', 'montaje', 'montar', 'capcut', 'narracion'],
     usar: [
+      M('AI Producer', 'montaje principal si hablas a cámara: cortes, subtítulos y apoyos; gasta créditos'),
+      M('Picsart Media Studio', 'montaje principal si mezclas clips y fotos; gasta créditos'),
+      M('HyperFrames', 'montaje principal si quieres texto y gráficos animados'),
+      H('CapCut', 'reserva manual en tu teléfono, para retoques'),
       S('remotion:remotion-create', 'vídeos con gráficos y texto hechos con código'),
       S('remotion:remotion-captions', 'subtítulos animados'),
       S('social-media-skills:ai-video', 'vídeo generado con IA'),
       S('social-media-skills:ai-voiceover', 'locución con voz de IA'),
+      H('Piper Sharvard hombre', 'tu voz gratis por defecto, sin internet'),
+      M('WhisperAI', 'transcribir un audio o vídeo a texto'),
+      M('ElevenLabs', 'narración si no usas tu voz; gasta créditos'),
       S('ffmpeg-llm:ffmpeg', 'convertir, cortar o comprimir un archivo'),
       A('ffmpeg-llm:ffmpeg-expert', 'arreglar un comando de FFmpeg que falla'),
-      H('Piper Sharvard hombre', 'tu voz gratis por defecto, sin internet'),
       H('Kokoro', 'otra voz gratis local, muy usada'),
-      M('WhisperAI', 'transcribir un audio o vídeo a texto'),
-      M('AI Producer', 'editar y subtitular un vídeo grabado'),
-      M('ElevenLabs', 'voz de Jarvis; gasta créditos'),
     ],
     mejora: 'Di duración, público, formato (vertical u horizontal) y si lleva voz.',
+  },
+  {
+    titulo: 'Tus proyectos de contenido',
+    palabras: ['espacio futuro', 'inka xtreme', 'inkaxtreme', 'marca personal'],
+    usar: [
+      S('jarvis-orb:plan', 'plan paso a paso con una herramienta principal por tarea'),
+      M('Google Docs', 'guardar el guion aprobado'),
+      M('Google Drive', 'reunir fuentes, clips, fotos y narración fuera del editor'),
+      M('Metricool', 'ver resultados al publicar; publicar solo con tu visto bueno'),
+      M('Google Sheets', 'anotar qué repetir y qué no'),
+    ],
+    mejora: 'Di qué material propio tienes (clips, fotos, notas, grabaciones) y para cuándo es.',
   },
   {
     titulo: 'Presentaciones',
@@ -317,14 +332,16 @@ const CATALOGO: Tema[] = [
   },
   {
     titulo: 'Investigar',
-    palabras: ['investig*', 'busca informacion', 'comparar', 'compara', 'tendencia', 'estado del arte', 'fuentes', 'informe sobre'],
+    palabras: ['investig*', 'busca informacion', 'comparar', 'compara', 'tendencia', 'estado del arte', 'fuentes', 'informe sobre', 'estudio', 'estudios', 'paper', 'evidencia'],
     usar: [
+      M('Parallel Search', 'buscador principal para probar: busca y lee páginas, sin cuenta'),
+      M('Exa', 'reserva: buscar páginas por significado; úsala si Parallel falla o no da buen resultado'),
+      M('Tavily', 'reserva: búsqueda web con fuentes; úsala si Parallel falla o no da buen resultado'),
+      M('Elicit', 'cuando necesites estudios científicos y su evidencia resumida'),
+      M('Firecrawl', 'leer una web concreta; gasta créditos'),
       S('anthropic-skills:deep-research', 'investigación con varias fuentes citadas'),
       S('brightdata-plugin:live-research', 'informe con datos de la web en vivo'),
       A('general-purpose', 'buscar en paralelo mientras sigues con otra cosa'),
-      M('Tavily', 'búsqueda web con fuentes para investigar'),
-      M('Exa', 'buscar páginas por significado, no solo por palabras'),
-      M('Firecrawl', 'leer páginas y buscar artículos científicos; gasta créditos'),
       M('Claude Docs', 'entregar la investigación como documento'),
     ],
     mejora: 'Di la pregunta que quieres responder y hasta qué fecha sirve la información.',
@@ -395,10 +412,11 @@ const CATALOGO: Tema[] = [
       S('social-media-skills:ai-image-editing', 'editar una imagen con IA'),
       S('social-media-skills:thumbnail-design', 'miniaturas'),
       S('social-media-skills:infographic-and-data-viz', 'infografías'),
+      M('Canva', 'portada o carrusel; necesita autorizarse'),
+      M('Higgsfield', 'solo si falta un plano y no tienes material propio; gasta créditos y no sustituye al plano real'),
       M('Figma', 'diseñar o editar en Figma'),
-      M('Higgsfield', 'imágenes y vídeo con IA; gasta créditos'),
     ],
-    mejora: 'Di tamaño, estilo y dónde se va a usar.',
+    mejora: 'Di tamaño, estilo y dónde se va a usar. Si tienes fotos o clips propios, empieza por ellos.',
   },
   {
     titulo: 'Bolsa y trading',
@@ -518,6 +536,10 @@ La persona tiene cientos de skills, agentes y conectores (MCP), no recuerda qué
 5. Ordena las opciones por sus preferencias: primero lo que suele elegir, y di «lo sueles elegir». Deja al final lo que suele descartar.
 6. La persona no va a pagar nada. Propón primero lo gratis u open source, busca alternativas en GitHub, y avisa antes de cualquier opción que gaste créditos o pida un plan de pago.
 7. Los bloques «[Jarvis]» son pistas por palabras clave y pueden fallar: ignora lo que no encaje. Si una skill nombrada ya no está en la lista, no la ofrezcas.
+8. Una herramienta principal por tarea y las demás como reserva: no hagas el mismo paso en varios sitios ni gastes créditos en versiones que la persona aún no ha elegido. Si una reserva sustituye a otra, di en qué se diferencian; no finjas que son equivalentes (un plano de Higgsfield no se reemplaza con otro igual: se usan fotos propias y texto).
+9. Los saldos y cuotas de cada servicio son desconocidos hasta que se consulten. No los supongas; antes de una prueba que gaste créditos (Higgsfield, AI Producer, Picsart, ElevenLabs, Firecrawl), dilo y espera el visto bueno.
+10. Guarda siempre fuera del editor: guion aprobado, clips y fotos originales, narración, subtítulos y último MP4. Un MP4 no conserva capas; cambiar de editor puede exigir rehacer el montaje.
+11. Nada se programa ni se publica en redes sin el visto bueno explícito de la persona.
 
 Esta guía no amplía ningún permiso: las reglas de seguridad y de confirmación siguen igual.`
 
@@ -626,7 +648,7 @@ function sugerenciasDe(temas: Tema[], usos: Usos, prefs: Preferencias): Sugerenc
   return todas
     .filter(s => !vistas.has(s.nombre) && vistas.add(s.nombre))
     .sort((a, b) => b.elegida - b.descartada - (a.elegida - a.descartada))
-    .slice(0, 10)
+    .slice(0, 12)
 }
 
 function historial(s: Sugerencia): string {

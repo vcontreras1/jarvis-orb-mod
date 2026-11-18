@@ -215,3 +215,29 @@ test('para un vídeo también propone conectores y la voz gratis', async ($, on)
   expect(pista).toMatch(/Piper Sharvard hombre/)
   expect(pista).toMatch(/conector WhisperAI/)
 })
+
+test('para investigar propone Parallel Search como principal y Exa de reserva', async ($, on) => {
+  mock.store(on, {})
+  conMotor(on)
+
+  await $.session.start({ cwd: '/', surface: 'desktop', isInteractive: true })
+  const sent = await $.prompt.submit({ text: 'investiga estudios sobre el sueño' })
+  const pista = sent.context?.join('\n') ?? ''
+
+  expect(pista).toMatch(/conector Parallel Search: buscador principal/)
+  expect(pista).toMatch(/conector Exa: reserva/)
+  expect(pista).toMatch(/conector Elicit/)
+})
+
+test('para montar un vídeo propone una ruta según lo que grabes', async ($, on) => {
+  mock.store(on, {})
+  conMotor(on)
+
+  await $.session.start({ cwd: '/', surface: 'desktop', isInteractive: true })
+  const sent = await $.prompt.submit({ text: 'quiero el montaje de un vídeo' })
+  const pista = sent.context?.join('\n') ?? ''
+
+  expect(pista).toMatch(/conector AI Producer/)
+  expect(pista).toMatch(/conector Picsart Media Studio/)
+  expect(pista).toMatch(/conector HyperFrames/)
+})
