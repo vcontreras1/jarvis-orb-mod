@@ -21,6 +21,10 @@ Para un proyecto (vídeo, reel, diapositivas o investigación), Claude carga la 
 
 `/jarvis-skills` muestra la chuleta completa y `/jarvis-skills video` el detalle de un tema. `/jarvis-consejos` lo apaga y lo enciende.
 
+### Una herramienta principal, el resto de reserva
+
+El catálogo de vídeo e investigación sigue un flujo (investigar, escribir, imágenes y voz, montar, revisar): Parallel Search como buscador principal con Exa y Tavily de reserva, Elicit para estudios, y una sola ruta de montaje según lo que grabes (AI Producer, Picsart Media Studio o HyperFrames, con CapCut manual). Jarvis no supone tu saldo en ningún servicio, avisa antes de gastar créditos y no programa ni publica sin tu visto bueno.
+
 Los temas están en `CATALOGO`, en `hooks/register.tsx`. Las palabras clave son simples: si un tema no salta, Claude sigue viendo la lista completa de skills.
 
 ## Jarvis estatus
